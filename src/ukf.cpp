@@ -92,11 +92,64 @@ UKF::~UKF() {}
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   /**
-  TODO:
-
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
+  if (!is_initialized_) {
+
+    if (meas_package.sensor_type_ == MeasurementPackage::Radar) {
+      double rho = meas_package.raw_measurements_(0);
+      double phi = meas_package.raw_measurements_(1);
+      double rhodot = meas_package.raw_measurements_(2);
+
+      // polar coordinates to cartesian:
+      //x = rho * cos(angle)
+      //y = rho * sin(angle)
+      // x_[2] can be adjusted
+      x_ << rho * cos(phi), rho * sin(phi), 4, rhodot * cos(phi), rhodot * sin(phi);
+
+      // State covariance matrix
+      P_ << std_radr_*std_radr_, 0, 0, 0, 0,
+            0, std_radr_*std_radr_, 0, 0, 0,
+            0, 1, 0, 0, 0,
+            0, 0, 0, std_radphi_, 0,
+            0, 0, 0, 0, std_radphi_;
+
+      R_radar << std_radr_*std_radr_, 0, 0,
+                 0, std_radphi_*std_radphi_, 0,
+                 0, 0, std_radrd_*std_radrd_;
+    } else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
+      // Init state; can adjust x_[2:]
+      x_ << meas_package.raw_measurements_(0), meas_package.raw_measurements_(1), 4, 0.5, 0.0;
+
+      // State covariance
+      P_ << std_laspx_*std_laspx_, 0, 0, 0, 0,
+            0, std_laspy_*std_laspy_, 0, 0, 0,
+            0, 0, 1, 0, 0,
+            0, 0, 0, 1, 0,
+            0, 0, 0, 0, 1;
+
+      // noise
+      R_laser << std_laspx_*std_laspx_, 0,
+                 0, std_laspy_*std_laspy_;
+    }
+
+    is_initialized_ = true;
+    time_us_ = meas_package.timestamp_;
+    return;
+  }
+
+  double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0;
+  time_us_ = meas_package.timestamp_;
+
+  Prediction(delta_t);
+
+  if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+    UpdateRadar(meas_package);
+  } else {
+    UpdateLidar(meas_package);
+  }
+
 }
 
 /**
