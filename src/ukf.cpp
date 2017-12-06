@@ -48,12 +48,40 @@ UKF::UKF() {
   //DO NOT MODIFY measurement noise values above these are provided by the sensor manufacturer.
 
   /**
-  TODO:
+
 
   Complete the initialization. See ukf.h for other member properties.
 
   Hint: one or more values initialized above might be wildly off...
   */
+  // Don't init until first measurement
+  is_initialized_ = false;
+
+  // State dimension
+  n_x_ = 5;
+
+  // Set dimension of augment
+  n_aug_ = 7;
+
+  // Spread parameter
+  lambda_ = 0;
+
+  // Matrix of sigma points
+  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
+  // Weights
+  weights_ = VectorXd(2 * n_aug_ + 1);
+
+  // Noise
+  R_radar = MatrixXd(3, 3);
+  R_laser = MatrixXd(2, 2);
+
+  // Time init
+  time_us_ = 0;
+
+  // NIS init
+  NIS_radar_ = 0;
+  NIS_laser_ = 0;
 }
 
 UKF::~UKF() {}
