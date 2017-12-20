@@ -159,11 +159,26 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
  */
 void UKF::Prediction(double delta_t) {
   /**
-  TODO:
 
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
+  // Spreading parameter
+  lambda_ = 3 - n_x_;
+  // Initiate sigma point matrix
+  MatrixXd Xsig_ = MatrixXd(n_x_, 2 * n_x_ + 1);
+
+  // Square root of P
+  MatrixXd A_ = P_.llt().matrixL();
+
+  // Set sigma points as columns
+  Xsig_.col(0) = x_;
+  for(int i = 0; i < n_x_; i++) {
+    Xsig_.col(i+1) = x_ + std::sqrt(lambda_ + n_x_) * A_.col(i);
+    Xsig_.col(i+1 + n_x_) = x_ - std::sqrt(lambda_ + n_x_) * A_.col(i);
+  }
+
+  
 }
 
 /**
