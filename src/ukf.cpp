@@ -178,7 +178,7 @@ void UKF::Prediction(double delta_t) {
     Xsig_.col(i+1 + n_x_) = x_ - std::sqrt(lambda_ + n_x_) * A_.col(i);
   }
 
-  
+
 }
 
 /**
@@ -187,7 +187,7 @@ void UKF::Prediction(double delta_t) {
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
   /**
-  TODO:
+  
 
   Complete this function! Use lidar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
