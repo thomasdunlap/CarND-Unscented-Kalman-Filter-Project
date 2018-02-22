@@ -166,7 +166,7 @@ void UKF::Prediction(double delta_t) {
   // Spreading parameter
   lambda_ = 3 - n_x_;
   // Initiate sigma point matrix
-  MatrixXd Xsig_ = MatrixXd(n_x_, 2 * n_x_ + 1);
+  MatrixXd Xsig_ = MatrixXd(n_x_, 2*n_x_ + 1);
 
   // Square root of P
   MatrixXd A_ = P_.llt().matrixL();
@@ -187,7 +187,7 @@ void UKF::Prediction(double delta_t) {
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
   /**
-  
+
 
   Complete this function! Use lidar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
