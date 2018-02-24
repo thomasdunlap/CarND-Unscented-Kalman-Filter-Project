@@ -48,12 +48,11 @@ UKF::UKF() {
   //DO NOT MODIFY measurement noise values above these are provided by the sensor manufacturer.
 
   /**
-
-
   Complete the initialization. See ukf.h for other member properties.
 
   Hint: one or more values initialized above might be wildly off...
   */
+
   // Don't init until first measurement
   is_initialized_ = false;
 
@@ -178,6 +177,9 @@ void UKF::Prediction(double delta_t) {
     Xsig_.col(i+1 + n_x_) = x_ - std::sqrt(lambda_ + n_x_) * A_.col(i);
   }
 
+  lambda_ = 3 - n_aug_;
+
+  
 
 }
 
@@ -202,7 +204,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  */
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
   /**
-  TODO:
+
 
   Complete this function! Use radar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
