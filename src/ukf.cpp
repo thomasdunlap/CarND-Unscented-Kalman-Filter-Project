@@ -165,7 +165,7 @@ void UKF::Prediction(double delta_t) {
   // Spreading parameter
   lambda_ = 3 - n_x_;
   // Initiate sigma point matrix
-  MatrixXd Xsig_ = MatrixXd(n_x_, 2*n_x_ + 1);
+  MatrixXd Xsig_ = MatrixXd(n_x_, 2 * n_x_ + 1);
 
   // Square root of P
   MatrixXd A_ = P_.llt().matrixL();
@@ -176,10 +176,36 @@ void UKF::Prediction(double delta_t) {
     Xsig_.col(i+1) = x_ + std::sqrt(lambda_ + n_x_) * A_.col(i);
     Xsig_.col(i+1 + n_x_) = x_ - std::sqrt(lambda_ + n_x_) * A_.col(i);
   }
-
+  // Spreading parameter for augmented
   lambda_ = 3 - n_aug_;
 
-  
+  // Augmented state vector
+  VectorXd x_aug_ = VectorXd(7);
+  // Augmented covariance
+  MatrixXd P_aug_ = MatrixXd(7, 7);
+  // Augmented sigma points
+  MatrixXd Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+
+  x_aug_.head(5) = x_;
+  x_aug_[5] = 0;
+  x_aug_[6] = 0;
+
+  MatrixXd Q = MatrixXd(2, 2);
+  Q << std_a_ * std_a_, 0,
+        0, std_yawdd_ * std_yawdd_;
+
+  P_aug_.fill(0.0);
+  P_aug_.topLeftCorner(5, 5) = P_;
+  P_aug_.bottomRightCorner(2, 2) Q;
+
+  MatrixXd A_aug = P_aug_.llt().matrixL();
+
+  // Sigma points
+  Xsig_aug_.col(0) = x_aug_;
+  for(int i = 0; i < n_aug_; i++) {
+    Xsig_aug_.col(i+1) = x_aug_ + std::sqrt(lambda_ + n_aug_) * A_aug.col(i);
+    Xsig_aug_.col(i+1+n_aug_) = x_aug_ - std::sqrt(lambda_ + n_aug_) * A_aug.col(i);
+  }
 
 }
 
