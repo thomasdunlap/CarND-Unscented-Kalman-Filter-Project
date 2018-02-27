@@ -207,6 +207,25 @@ void UKF::Prediction(double delta_t) {
     Xsig_aug_.col(i+1+n_aug_) = x_aug_ - std::sqrt(lambda_ + n_aug_) * A_aug.col(i);
   }
 
+
+  //set vectors for each part added to x
+  VectorXd vec1 = VectorXd(5);
+  VectorXd vec2 = VectorXd(5);
+
+  // Predict sigma points
+  for(int i = 0; i < 2 * n_aug_ + 1; i++) {
+    VectorXd calc_col = Xsig_aug_.col(i);
+    double px = calc_col(0);
+    double py = calc_col(1);
+    double v = calc_col(2);
+    double yaw = calc_col(3);
+    double yawd = calc_col(4);
+    double v_aug = calc_col(5);
+    double v_yawdd = calc_col(6);
+
+    //original
+    VectorXd orig = calc_col.head(5);
+
 }
 
 /**
