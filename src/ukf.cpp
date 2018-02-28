@@ -226,6 +226,22 @@ void UKF::Prediction(double delta_t) {
     //original
     VectorXd orig = calc_col.head(5);
 
+    if(yawd > .001) {
+      // If yaw dot is not zero
+      vec1 << (v/yawd)*(sin(yaw+yawd*delta_t) - sin(yaw)),
+              (v/yawd)*(-cos(yaw+yawd*delta_t) + cos(yaw)),
+              0,
+              yawd * delta_t,
+              0;
+    } else {
+      // If yaw dot is zero - avoid division by zero
+      vec1 << v*cos(yaw)*delta_t,
+              v*sin(yaw)*delta_t,
+              0,
+              yawd*delta_t,
+              0;
+    }
+
 }
 
 /**
