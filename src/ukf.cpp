@@ -249,8 +249,48 @@ void UKF::Prediction(double delta_t) {
             .5 * delta_t * delta_t * v_yawdd,
             delta_t * v_yawdd;
 
-    // Write predicted sigma points into right column
+    // Assign predicted sigma points
     Xsig_pred_.col(i) << orig + vec1 + vec2;
+  }
+
+  // Predicted state vector
+  VectorXd x_pred = VectorXd(n_x_);
+
+  // Predicted covariance Matrix
+  MatrixXd P_pred = MatrixXd(n_x_, n_x_);
+
+  x_pred.fill(0.0);
+  P_pred.fill(0.0);
+
+  for(int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Weights
+    if (i == 0) {
+      weights_(i) = lambda_ / (lambda_ + n_aug_);
+    } else {
+      weights_(i) = .5 / (lambda_ + n_aug_);
+    }
+
+    // Predict mean state
+    x_pred += weights_(i) * Xsig_pred_.col(i);
+  }
+
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Predict state covariance matrix
+    VectorXd x_diff = Xsig_pred_.col(i) - x_pred;
+
+    // Angle normalization
+    if (x_diff(3) > M_PI) {
+      x_diff(3) -= 2. * M_PI;
+    } else if (x_diff(3) < -M_PI) {
+      x_diff(3) += 2. * M_PI;
+    }
+    P_pred += weights_(i) * x_diff * x_diff.transpose();
+  }
+
+  x_ = x_pred;
+  P_ = P_pred;
 
 }
 
