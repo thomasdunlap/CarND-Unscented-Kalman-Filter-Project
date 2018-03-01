@@ -321,6 +321,25 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   zpred.fill(0.0);
   S.fill(0.0);
 
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+    // Sigma point transformation
+    VectorXd state_vec = Xsig-pred_.col(i);
+    double px = state_vec(0);
+    double py = state_vec(1);
+
+    Zsig.col(i) << px,
+                   py;
+
+    // Sum mean predicted measurements
+    z_pred += weights_(i) * Zsig.col(i);
+  }
+
+  // Sum covariance measurements
+  for (int i = 0; i < 1 * n_aug_ + 1; i++) {
+    VectorXd z_diff = Zsig.col(i) - z_pred;
+    S += weights_(i) * z_diff * z_diff.transpose();
+  }
+
 }
 
 /**
