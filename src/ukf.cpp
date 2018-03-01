@@ -228,19 +228,29 @@ void UKF::Prediction(double delta_t) {
 
     if(yawd > .001) {
       // If yaw dot is not zero
-      vec1 << (v/yawd)*(sin(yaw+yawd*delta_t) - sin(yaw)),
-              (v/yawd)*(-cos(yaw+yawd*delta_t) + cos(yaw)),
+      vec1 << (v / yawd)*(sin(yaw + yawd * delta_t) - sin(yaw)),
+              (v / yawd)*(-cos(yaw + yawd * delta_t) + cos(yaw)),
               0,
               yawd * delta_t,
               0;
     } else {
       // If yaw dot is zero - avoid division by zero
-      vec1 << v*cos(yaw)*delta_t,
-              v*sin(yaw)*delta_t,
+      vec1 << v * cos(yaw) * delta_t,
+              v * sin(yaw) * delta_t,
               0,
-              yawd*delta_t,
+              yawd * delta_t,
               0;
     }
+
+
+    vec2 << .5 * delta_t * delta_t * cos(yaw) * v_aug,
+            .5 * delta_t * delta_t * sin(yaw) * v_aug,
+            delta_t * v_aug,
+            .5 * delta_t * delta_t * v_yawdd,
+            delta_t * v_yawdd;
+
+    // Write predicted sigma points into right column
+    Xsig_pred_.col(i) << orig + vec1 + vec2;
 
 }
 
