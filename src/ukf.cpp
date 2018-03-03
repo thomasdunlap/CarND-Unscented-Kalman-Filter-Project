@@ -465,5 +465,40 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   MatrixXd Tc = MatrixXd(n_x_, n_z);
   Tc.fill(0.0);
 
+  // Assign cross correlation values
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+    VectorXd x_diff = Xsig_pred_.col(i) - x_;
+    if (x_diff(3) > M_PI) {
+      x_diff(3) -= 2. * M_PI;
+    } else if (x_diff(3) < -M_PI) {
+      x_diff(3) += 2. * M_PI;
+    }
+
+    VectorXd z_diff = Zsig.col(i) - z_pred;
+    if (z_diff(1) > M_PI) {
+      z_diff(1) -= 2. * M_PI;
+    } else if (z_diff(1) < -M_PI) {
+      z_diff(1) += 2. * M_PI;
+    }
+
+    Tc += weights_(i) * x_diff * z_diff.transpose();
+  }
+
+  VectorXd z_diff = z - z_pred;
+
+  if (z_diff(1) > M_PI) {
+    z_diff(1) -= 2. * M_PI;
+  } else if (z_diff(1) < -M_PI) {
+    z_diff(1) += 2. * M_PI;
+  }
+
+  NIS_radar_ = z_diff.transpose() * S.inverse() * z_diff;
+
+  // Kalman gain
+  MatrixXd K = Tc * S.inverse();
+
+  // Update state and covariance 
+  x_ += K*z_diff;
+  P_ -= K*S*K.transpose();
 
 }
