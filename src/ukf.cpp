@@ -340,6 +340,22 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     S += weights_(i) * z_diff * z_diff.transpose();
   }
 
+  // Add noise
+  S += R_laser;
+
+  // State vector for measurements
+  VectorXd z = VectorXd(n_z);
+
+  double meas_px = meas_package.raw_measurements_(0);
+  double meas_py = meas_package.raw_measurements_(1);
+
+  z << meas_px,
+       meas_py;
+
+  // Cross correlation matrix
+  MatrixXd Tc = MatrixXd(n_x_, n_z);
+  Tc.fill(0.0);
+
 }
 
 /**
