@@ -382,7 +382,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // Update state and covariance
   x_ += K * z_diff;
   P_ -= K * S * K.transpose();
-
 }
 
 /**
@@ -433,8 +432,38 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
                    phi,
                    rho_d;
 
-    //calculate mean predicted measurement
+    // Calculate predicted measurement
     z_pred += weights_(i) * Zsig.col(i);
   }
+
+  // Covariance matrix S calculations
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+    VectorXd z_diff = Zsig.col(i) - z_pred;
+    if (z_diff(1) > M_PI) {
+      z_diff(1) -= 2. * M_PI;
+    } else if (z_diff(1) < - M_PI) {
+      z_diff(1) += 2. * M_PI;
+    }
+    S += weights_(i) * z_diff * z_diff.transpose();
+  }
+
+  // Noise
+  S += R_radar;
+
+  // Measurement state vector
+  VectorXd z = VectorXd(n_z);
+
+  double meas_rho = meas_package.raw_measurements_(0);
+  double meas_phi = meas_package.raw_measurements_(1);
+  double meas_rhod = meas_package.raw_measurements_(2);
+
+  z << meas_rho,
+       meas_phi,
+       meas_rhod;
+
+  // Cross correlation
+  MatrixXd Tc = MatrixXd(n_x_, n_z);
+  Tc.fill(0.0);
+
 
 }
