@@ -356,6 +356,33 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   MatrixXd Tc = MatrixXd(n_x_, n_z);
   Tc.fill(0.0);
 
+  // Calculate cross correlation
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+    VectorXd x_diff = Xsig_pred_.col(i) - x_;
+
+    // Angle normalization
+    if (x_diff(3) > M_PI) {
+      x_diff(3) -= 2. * M_PI;
+    } else if (x_diff(3) < -M_PI) {
+      x_diff(3) += 2. * M_PI;
+    }
+
+    VectorXd z_diff = Zsig.col(i) - z_pred;
+
+    Tc += weights_(i) * x_diff * z_diff.transpose();
+
+  }
+
+  VectorXd z_diff = z - z_pred;
+  NIS_laser_ = z_diff.transpose() * S.inverse() * z_diff;
+
+  // Kalman gain
+  MatrixXd K = Tc * S.inverse();
+
+  // Update state and covariance
+  x_ += K * z_diff;
+  P_ -= K * S * K.transpose();
+
 }
 
 /**
