@@ -497,8 +497,8 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   // Kalman gain
   MatrixXd K = Tc * S.inverse();
 
-  // Update state and covariance 
-  x_ += K*z_diff;
-  P_ -= K*S*K.transpose();
+  // Update state and covariance
+  x_ += K * z_diff;
+  P_ -= K * S * K.transpose();
 
 }
