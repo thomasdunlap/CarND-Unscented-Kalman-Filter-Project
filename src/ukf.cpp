@@ -96,7 +96,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   */
   if (!is_initialized_) {
 
-    if (meas_package.sensor_type_ == MeasurementPackage::Radar) {
+    if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       double rho = meas_package.raw_measurements_(0);
       double phi = meas_package.raw_measurements_(1);
       double rhodot = meas_package.raw_measurements_(2);
@@ -318,12 +318,12 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   MatrixXd S = MatrixXd(n_z, n_z);
 
   Zsig.fill(0.0);
-  zpred.fill(0.0);
+  z_pred.fill(0.0);
   S.fill(0.0);
 
   for (int i = 0; i < 2 * n_aug_ + 1; i++) {
     // Sigma point transformation
-    VectorXd state_vec = Xsig-pred_.col(i);
+    VectorXd state_vec = Xsig_pred_.col(i);
     double px = state_vec(0);
     double py = state_vec(1);
 
