@@ -196,7 +196,7 @@ void UKF::Prediction(double delta_t) {
 
   P_aug_.fill(0.0);
   P_aug_.topLeftCorner(5, 5) = P_;
-  P_aug_.bottomRightCorner(2, 2) Q;
+  P_aug_.bottomRightCorner(2, 2) = Q;
 
   MatrixXd A_aug = P_aug_.llt().matrixL();
 
