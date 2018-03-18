@@ -25,7 +25,7 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 1;
+  std_a_ = .75;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
   std_yawdd_ = 0.5;
@@ -60,10 +60,10 @@ UKF::UKF() {
   n_x_ = 5;
 
   // Set dimension of augment
-  n_aug_ = 7;
+  n_aug_ = n_x_ + 2;
 
   // Spread parameter
-  lambda_ = 0;
+  lambda_ = 2.4 - n_aug_;
 
   // Matrix of sigma points
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
