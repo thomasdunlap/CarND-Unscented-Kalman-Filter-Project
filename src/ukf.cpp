@@ -76,11 +76,11 @@ UKF::UKF() {
   R_laser = MatrixXd(2, 2);
 
   // Time init
-  time_us_ = 0;
+  time_us_ = 0.0;
 
   // NIS init
-  NIS_radar_ = 0;
-  NIS_laser_ = 0;
+  NIS_radar_ = 0.0;
+  NIS_laser_ = 0.0;
 }
 
 UKF::~UKF() {}

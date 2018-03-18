@@ -71,8 +71,8 @@ public:
   MatrixXd R_radar;
   MatrixXd R_laser;
 
-  int NIS_laser_;
-  int NIS_radar_;
+  double NIS_laser_;
+  double NIS_radar_;
   /**
    * Constructor
    */
