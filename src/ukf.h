@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "tools.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -30,6 +31,9 @@ public:
 
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
+
+  ///* Weighted Xsig_pred_ and x_ diff, needed in both prediction and update
+  MatrixXd X_abs_w_;
 
   ///* time when the state is true, in us
   long long time_us_;
@@ -67,12 +71,12 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
-  // Noise
-  MatrixXd R_radar;
-  MatrixXd R_laser;
-
-  double NIS_laser_;
+  ///* the current NIS for radar
   double NIS_radar_;
+
+  ///* the current NIS for laser
+  double NIS_laser_;
+
   /**
    * Constructor
    */
@@ -107,6 +111,14 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+
+  /**
+   * Normalizes the angle, yaw or phi.
+   * @param double angle
+   * @return The normalized angle
+   */
+  double NormalizeAngle(double angle);
 };
 
 #endif /* UKF_H */
