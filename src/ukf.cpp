@@ -75,19 +75,24 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   */
   // Initialization
   if (!is_initialized_) {
-    x_ << 0.0,0.0,0.0,0,0.0;
+
+    // State vector
+    x_.fill(0.0);
+
+    // Covariance matrix
     P_ << 1.0, 0.0, 0.0, 0.0, 0.0,
           0.0, 1.0, 0.0, 0.0, 0.0,
           0.0, 0.0, 20.0, 0.0, 0.0,
           0.0, 0.0, 0.0, 13.15, 0.0,
           0.0, 0.0, 0.0, 0.0, 0.1;
+
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       float rho = meas_package.raw_measurements_(0);
       float phi = meas_package.raw_measurements_(1);
-      float rhodot = meas_package.raw_measurements_(2);
+      float rho_dot = meas_package.raw_measurements_(2);
       x_(0) = rho * cos(phi);
       x_(1) = rho * sin(phi);
-      x_(2) = rhodot;
+      x_(2) = rho_dot;
       P_(2,2) = 1;
     }
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
