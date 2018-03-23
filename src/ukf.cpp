@@ -50,9 +50,9 @@ UKF::UKF() {
   */
   n_x_ = 5;
   n_aug_ = 7;
-  //int n_sig = 2 * n_aug_ + 1;
   lambda_ = 3 - n_aug_;
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
   // Set weights
   weights_ = VectorXd(2 * n_aug_ + 1);
   weights_(0) = (double)lambda_ / (lambda_ + n_aug_);
@@ -84,6 +84,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           0.0, 0.0, 0.0, 1.0, 0.0,
           0.0, 0.0, 0.0, 0.0, 1.0;
 
+    // If radar
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       float rho = meas_package.raw_measurements_(0);
       float phi = meas_package.raw_measurements_(1);
@@ -93,11 +94,17 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       x_(2) = rho_dot;
 
     }
+
+    // If laser
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       x_(0) = meas_package.raw_measurements_(0);
       x_(1) = meas_package.raw_measurements_(1);
-      if (fabs(x_(0)) < 0.001 && fabs(x_(1)) < 0.001) {
+
+      // Adjust for values too close to zero
+      if (fabs(x_(0)) < 0.001) {
         x_(0) = 0.001;
+      }
+      if (fabs(x_(1)) < 0.001) {
         x_(1) = 0.001;
       }
     }
