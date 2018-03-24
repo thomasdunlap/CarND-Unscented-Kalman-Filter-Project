@@ -153,7 +153,7 @@ void UKF::Prediction(double delta_t) {
 /*******************************************************************************
  * Augmentation
  ******************************************************************************/
-  int n_sig = 2 * n_aug_ + 1;
+
 
   //create augmented mean vector
   VectorXd x_aug = VectorXd(7);
@@ -162,7 +162,7 @@ void UKF::Prediction(double delta_t) {
   MatrixXd P_aug = MatrixXd(7, 7);
 
   //create sigma point matrix
-  MatrixXd Xsig_aug = MatrixXd(n_aug_, n_sig);
+  MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
 
   //create augmented mean state
   x_aug.head(5) = x_;
@@ -189,7 +189,7 @@ void UKF::Prediction(double delta_t) {
  ******************************************************************************/
 
   //predict sigma points
-  for (int i = 0; i< n_sig; i++) {
+  for (int i = 0; i< 2 * n_aug_ + 1; i++) {
     //extract values for better readability
     double p_x = Xsig_aug(0, i);
     double p_y = Xsig_aug(1, i);
@@ -232,8 +232,8 @@ void UKF::Prediction(double delta_t) {
   MatrixXd X_abs = Xsig_pred_.array().colwise() - x_.array();
 
   //angle normalization
-  for (int i=0; i < n_sig; i++) {
-    X_abs(3,i) = NormalizeAngle(X_abs(3,i));
+  for (int i=0; i < 2 * n_aug_ + 1; i++) {
+    X_abs(3,i) = NormalizeAngle(X_abs(3, i));
   }
 
   // Will be used in Update also
@@ -260,9 +260,9 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  ******************************************************************************/
 
   int n_z = 2;
-  int n_sig = 2 * n_aug_ + 1;
+  
   //create matrix for sigma points in measurement space
-  MatrixXd Zsig = MatrixXd(n_z, n_sig);
+  MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
 
   //mean predicted measurement
   VectorXd z_pred = VectorXd(n_z);
@@ -272,7 +272,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   MatrixXd S = MatrixXd(n_z,n_z);
 
   //transform sigma points into measurement space
-  for (int i = 0; i < n_sig; ++i) {
+  for (int i = 0; i < 2 * n_aug_ + 1; ++i) {
       Zsig(0,i) = Xsig_pred_(0,i);
       Zsig(1,i) = Xsig_pred_(1,i);
   }
@@ -285,7 +285,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   MatrixXd Z_abs = Zsig.array().colwise() - z_pred.array();
 
   //angle normalization
-  for (int i=0; i < n_sig; i++) {
+  for (int i=0; i < 2 * n_aug_ + 1; i++) {
     Z_abs(1,i) = NormalizeAngle(Z_abs(1,i));
   }
   MatrixXd Z_abs_w = Z_abs.array().rowwise() * weights_.transpose().array();
@@ -340,9 +340,9 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
  * Predicted Radar Measurement
  ******************************************************************************/
   int n_z = 3;
-  int n_sig = 2 * n_aug_ + 1;
 
-  MatrixXd Zsig = MatrixXd(n_z, n_sig);
+
+  MatrixXd Zsig = MatrixXd(n_z, 2 * n_aug_ + 1);
 
   //mean predicted measurement
   VectorXd z_pred = VectorXd(n_z);
@@ -352,7 +352,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   MatrixXd S = MatrixXd(n_z,n_z);
 
   //transform sigma points into measurement space
-  for (int i = 0; i < n_sig; ++i) {
+  for (int i = 0; i < 2 * n_aug_ + 1; ++i) {
       double px = Xsig_pred_(0,i);
       double py = Xsig_pred_(1,i);
       double v = Xsig_pred_(2,i);
@@ -371,7 +371,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   MatrixXd Z_abs = Zsig.array().colwise() - z_pred.array();
 
   //angle normalization
-  for (int i=0; i < n_sig; i++) {
+  for (int i=0; i < 2 * n_aug_ + 1; i++) {
     Z_abs(1,i) = NormalizeAngle(Z_abs(1,i));
   }
 
