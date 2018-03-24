@@ -123,17 +123,21 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     time_us_ = meas_package.timestamp_;
     return;
   }
-
+    // Change in time - store for future use
     float dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
     time_us_ = meas_package.timestamp_;
+
+    // Predict locatization
     Prediction(dt);
+
+    // Update measured values
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       UpdateRadar(meas_package);
     }
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       UpdateLidar(meas_package);
     }
-  
+
 }
 
 /**
