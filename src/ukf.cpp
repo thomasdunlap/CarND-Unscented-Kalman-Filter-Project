@@ -111,6 +111,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     is_initialized_ = true;
     time_us_ = meas_package.timestamp_;
   }
+
+  // If already initialized 
   else {
     if ((!use_radar_ &&
          meas_package.sensor_type_ == MeasurementPackage::RADAR)
