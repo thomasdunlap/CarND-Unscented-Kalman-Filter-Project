@@ -64,7 +64,6 @@ UKF::UKF() {
   weights_ = VectorXd(2 * n_aug_ + 1);
   weights_.fill((double) 0.5 / (n_aug_ + lambda_));
   weights_(0) = lambda_ / (lambda_ + n_aug_);
-
 }
 
 UKF::~UKF() {}
@@ -91,13 +90,16 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           0.0, 0.0, 0.0, 1.0, 0.0,
           0.0, 0.0, 0.0, 0.0, 1.0;
 
-    // If radar
+    // Initatiate radar measurements
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       float rho = meas_package.raw_measurements_(0);
       float phi = meas_package.raw_measurements_(1);
       float rho_dot = meas_package.raw_measurements_(2);
+      // x
       x_(0) = rho * cos(phi);
+      // y
       x_(1) = rho * sin(phi);
+      // v
       x_(2) = rho_dot;
 
     }
@@ -107,7 +109,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       x_(0) = meas_package.raw_measurements_(0);
       x_(1) = meas_package.raw_measurements_(1);
 
-      // Adjust for values too close to zero
+      // Adjust for x,y values too close to zero
       if (fabs(x_(0)) < 0.001) {
         x_(0) = 0.001;
       }
@@ -115,19 +117,13 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
         x_(1) = 0.001;
       }
     }
+    // Set as initialized
     is_initialized_ = true;
+    // Update time
     time_us_ = meas_package.timestamp_;
+    return;
   }
 
-  // If already initialized
-  else {
-    if ((!use_radar_ &&
-         meas_package.sensor_type_ == MeasurementPackage::RADAR)
-        ||
-        (!use_laser_ &&
-          meas_package.sensor_type_ == MeasurementPackage::LASER)) {
-      return;
-    }
     float dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
     time_us_ = meas_package.timestamp_;
     Prediction(dt);
@@ -137,7 +133,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       UpdateLidar(meas_package);
     }
-  }
+  
 }
 
 /**
