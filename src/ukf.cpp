@@ -48,16 +48,23 @@ UKF::UKF() {
   Complete the initialization. See ukf.h for other member properties.
   Hint: one or more values initialized above might be wildly off...
   */
+  // State length
   n_x_ = 5;
-  n_aug_ = 7;
+
+  // Augmented state length
+  n_aug_ = n_x_ + 2;
+
+  // Lambda values to help initiate weights
   lambda_ = 3 - n_aug_;
+
+  // Sigma points matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
   // Set weights
   weights_ = VectorXd(2 * n_aug_ + 1);
-  weights_(0) = (double)lambda_ / (lambda_ + n_aug_);
-  double weights_val = 1.0 / (2.0 * (lambda_ + n_aug_));
-  weights_.bottomRows(2 * n_aug_).fill(weights_val);
+  weights_.fill((double) 0.5 / (n_aug_ + lambda_));
+  weights_(0) = lambda_ / (lambda_ + n_aug_);
+
 }
 
 UKF::~UKF() {}
@@ -112,7 +119,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     time_us_ = meas_package.timestamp_;
   }
 
-  // If already initialized 
+  // If already initialized
   else {
     if ((!use_radar_ &&
          meas_package.sensor_type_ == MeasurementPackage::RADAR)
