@@ -115,6 +115,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     time_us_ = meas_package.timestamp_;
     return;
   }
+
     // Change in time - store for future use
     float dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
     time_us_ = meas_package.timestamp_;
@@ -162,9 +163,9 @@ void UKF::Prediction(double delta_t) {
 
 
   P_aug.fill(0.0);
-  P_aug.topLeftCorner(5,5) = P_;
-  P_aug(5,5) = std_a_ * std_a_;
-  P_aug(6,6) = std_yawdd_ * std_yawdd_;
+  P_aug.topLeftCorner(5, 5) = P_;
+  P_aug(5, 5) = std_a_ * std_a_;
+  P_aug(6, 6) = std_yawdd_ * std_yawdd_;
 
   //create square root matrix
   MatrixXd A = P_aug.llt().matrixL();
@@ -410,7 +411,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
  */
 double UKF::NormalizeAngle(double angle) {
   //for very high yaw
-  int big_yaw_pi = 100.0 * M_PI;
+  int big_yaw_pi = 100.0 * M_PI; //float?
   double pi2 = 2.0 * M_PI;
   if (fabs(angle) > big_yaw_pi) {
     angle -= floor(angle / pi2) * (pi2);
