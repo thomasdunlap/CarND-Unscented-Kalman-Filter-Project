@@ -167,11 +167,11 @@ void UKF::Prediction(double delta_t) {
   P_aug(5, 5) = std_a_ * std_a_;
   P_aug(6, 6) = std_yawdd_ * std_yawdd_;
 
-  //create square root matrix
+  // Square root matrix
   MatrixXd A = P_aug.llt().matrixL();
   MatrixXd B = sqrt(lambda_ + n_aug_) * A;
 
-  //create augmented sigma points
+  // Augmented sigma points
   Xsig_aug.col(0) = x_aug;
   Xsig_aug.leftCols(n_aug_ + 1).rightCols(n_aug_) = x_aug.replicate(1, B.cols()) + B;
   Xsig_aug.rightCols(n_aug_) = x_aug.replicate(1, B.cols()) - B;
@@ -180,9 +180,9 @@ void UKF::Prediction(double delta_t) {
  * Prediction
  ******************************************************************************/
 
-  //predict sigma points
+  // Predict sigma points
   for (int i = 0; i< 2 * n_aug_ + 1; i++) {
-    //extract values for better readability
+    // Extract values for better readability
     double p_x = Xsig_aug(0, i);
     double p_y = Xsig_aug(1, i);
     double v = Xsig_aug(2, i);
@@ -220,10 +220,10 @@ void UKF::Prediction(double delta_t) {
   MatrixXd x_sum = Xsig_pred_.array().rowwise() * weights_.transpose().array();
   x_ = x_sum.rowwise().sum();
 
-  //predict state covariance matrix
+  // Predict state covariance matrix
   MatrixXd X_abs = Xsig_pred_.array().colwise() - x_.array();
 
-  //angle normalization
+  // Angle normalization
   for (int i=0; i < 2 * n_aug_ + 1; i++) {
     X_abs(3,i) = NormalizeAngle(X_abs(3, i));
   }
