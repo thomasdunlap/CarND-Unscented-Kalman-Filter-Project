@@ -208,9 +208,9 @@ void UKF::Prediction(double delta_t) {
                           (0.5*delta_t2 * sin(yawd) * nu_a);
     }
 
-    Xsig_pred_(2,i) = v + nu_a*delta_t;
-    Xsig_pred_(3,i) = yaw + yawd_dt + 0.5*nu_yawdd * delta_t2;
-    Xsig_pred_(4,i) = yawd + nu_yawdd * delta_t;
+    Xsig_pred_(2, i) = v + nu_a*delta_t;
+    Xsig_pred_(3, i) = yaw + yawd_dt + 0.5*nu_yawdd * delta_t2;
+    Xsig_pred_(4, i) = yawd + nu_yawdd * delta_t;
   }
 /*******************************************************************************
  * Predicted Mean Covariance
