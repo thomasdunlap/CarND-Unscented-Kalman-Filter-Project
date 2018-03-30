@@ -225,7 +225,7 @@ void UKF::Prediction(double delta_t) {
 
   // Angle normalization
   for (int i=0; i < 2 * n_aug_ + 1; i++) {
-    X_abs(3,i) = NormalizeAngle(X_abs(3, i));
+    X_abs(3, i) = NormalizeAngle(X_abs(3, i));
   }
 
   // Will be used in Update also
@@ -298,7 +298,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   //residual
   VectorXd z_diff = z - z_pred;
 
-  //angle normalization
+  // Normalize angle
   z_diff(1) = NormalizeAngle(z_diff(1));
 
 
