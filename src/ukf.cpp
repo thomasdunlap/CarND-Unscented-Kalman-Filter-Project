@@ -182,7 +182,7 @@ void UKF::Prediction(double delta_t) {
 
   // Predict sigma points
   for (int i = 0; i< 2 * n_aug_ + 1; i++) {
-    // Extract values for better readability
+    // Better readability
     double p_x = Xsig_aug(0, i);
     double p_y = Xsig_aug(1, i);
     double v = Xsig_aug(2, i);
@@ -194,17 +194,17 @@ void UKF::Prediction(double delta_t) {
     double delta_t2 = delta_t * delta_t;
     double yawd_dt = yawd * delta_t;
 
-    //avoid division by zero
+    // Control for zero-like division
     if (fabs(yawd) > 0.001) {
-        Xsig_pred_(0,i) = p_x + v/yawd * (sin(yaw + yawd_dt) - sin(yaw)) +
+        Xsig_pred_(0, i) = p_x + v/yawd * (sin(yaw + yawd_dt) - sin(yaw)) +
                           (0.5 * delta_t2 * cos(yawd) * nu_a);
-        Xsig_pred_(1,i) = p_y + v/yawd * (-cos(yaw + yawd_dt) + cos(yaw)) +
+        Xsig_pred_(1, i) = p_y + v/yawd * (-cos(yaw + yawd_dt) + cos(yaw)) +
                           (0.5 * delta_t2 * sin(yawd) * nu_a);
     }
     else {
-        Xsig_pred_(0,i) = p_x + v*delta_t * cos(yaw) +
+        Xsig_pred_(0, i) = p_x + v*delta_t * cos(yaw) +
                           (0.5*delta_t2 * cos(yawd) * nu_a);
-        Xsig_pred_(1,i) = p_y + v*delta_t * sin(yaw) +
+        Xsig_pred_(1, i) = p_y + v*delta_t * sin(yaw) +
                           (0.5*delta_t2 * sin(yawd) * nu_a);
     }
 
@@ -228,7 +228,6 @@ void UKF::Prediction(double delta_t) {
     X_abs(3, i) = NormalizeAngle(X_abs(3, i));
   }
 
-  // Will be used in Update also
   X_abs_w_ = X_abs.array().rowwise() * weights_.transpose().array();
 
   P_ = X_abs_w_ * X_abs.transpose();
@@ -239,49 +238,43 @@ void UKF::Prediction(double delta_t) {
  * @param {MeasurementPackage} meas_package
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
-  /**
-  TODO:
-  Complete this function! Use lidar data to update the belief about the object's
-  position. Modify the state vector, x_, and covariance, P_.
-  You'll also need to calculate the lidar NIS.
-  */
-
 
 /*******************************************************************************
  * Predicted Lidar Measurement
  ******************************************************************************/
 
-  //create matrix for sigma points in measurement space
+  // Sigma points
   MatrixXd Zsig = MatrixXd(2, 2 * n_aug_ + 1);
 
-  //mean predicted measurement
+  // Predicted state
   VectorXd z_pred = VectorXd(2);
+
+  // Measured state
   VectorXd z = VectorXd(2);
 
-  //measurement covariance matrix S
+  // Measurement covariance
   MatrixXd S = MatrixXd(2, 2);
 
-  //transform sigma points into measurement space
+  // Sigma point transformation
   for (int i = 0; i < 2 * n_aug_ + 1; ++i) {
       Zsig(0, i) = Xsig_pred_(0, i);
       Zsig(1, i) = Xsig_pred_(1, i);
   }
 
-  //calculate mean predicted measurement
+  // Predicted state
   MatrixXd z_sum = Zsig.array().rowwise() * weights_.transpose().array();
   z_pred = z_sum.rowwise().sum();
 
-  //calculate measurement covariance matrix S
+  // Calculations for S
   MatrixXd Z_abs = Zsig.array().colwise() - z_pred.array();
-
-  //angle normalization
   for (int i=0; i < 2 * n_aug_ + 1; i++) {
-    Z_abs(1,i) = NormalizeAngle(Z_abs(1,i));
+    // Normalize angles
+    Z_abs(1, i) = NormalizeAngle(Z_abs(1, i));
   }
   MatrixXd Z_abs_w = Z_abs.array().rowwise() * weights_.transpose().array();
   S = Z_abs_w * Z_abs.transpose();
 
-   //add measurement noise covariance matrix
+   // Measurement noise
   S(0, 0) += std_laspx_ * std_laspx_;
   S(1, 1) += std_laspy_ * std_laspy_;
 
@@ -291,28 +284,22 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 
   MatrixXd Tc = X_abs_w_ * Z_abs.transpose();
 
-  //calculate Kalman gain K;
+  // Kalman gain K;
   MatrixXd K = Tc * S.inverse();
 
   z = meas_package.raw_measurements_;
-  //residual
+
+  // Difference between predicted and measured
   VectorXd z_diff = z - z_pred;
 
   // Normalize angle
   z_diff(1) = NormalizeAngle(z_diff(1));
 
-
   NIS_laser_ = z_diff.transpose() * S.inverse() * z_diff;
 
-  // prevent P from diverging
-  if (NIS_laser_ > 100.0) {
-    is_initialized_ = false;
-  }
-  else {
-    //update state mean and covariance matrix
-    x_ += K * z_diff;
-    P_ -= K * S * K.transpose();
-  }
+  x_ += K * z_diff;
+  P_ -= K * S * K.transpose();
+
 }
 
 /**
@@ -334,23 +321,23 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   MatrixXd Zsig = MatrixXd(3, 2 * n_aug_ + 1);
 
-  //mean predicted measurement
+  // mean predicted measurement
   VectorXd z_pred = VectorXd(3);
   VectorXd z = VectorXd(3);
 
-  //measurement covariance matrix S
+  // measurement covariance matrix S
   MatrixXd S = MatrixXd(3, 3);
 
-  //transform sigma points into measurement space
+  // transform sigma points into measurement space
   for (int i = 0; i < 2 * n_aug_ + 1; ++i) {
       double px = Xsig_pred_(0, i);
       double py = Xsig_pred_(1, i);
       double v = Xsig_pred_(2, i);
       double y = Xsig_pred_(3, i);
 
-      Zsig(0,i) = sqrt((px * px) + (py * py));
-      Zsig(1,i) = atan2(py, px);
-      Zsig(2,i) = (((px * cos(y)) + (py * sin(y))) * v) / Zsig(0, i);
+      Zsig(0, i) = sqrt((px * px) + (py * py));
+      Zsig(1, i) = atan2(py, px);
+      Zsig(2, i) = (((px * cos(y)) + (py * sin(y))) * v) / Zsig(0, i);
   }
 
   //calculate mean predicted measurement
@@ -360,16 +347,16 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   //calculate measurement covariance matrix S
   MatrixXd Z_abs = Zsig.array().colwise() - z_pred.array();
 
-  //angle normalization
+  // Normalize angles
   for (int i=0; i < 2 * n_aug_ + 1; i++) {
-    Z_abs(1, i) = NormalizeAngle(Z_abs(1,i));
+    Z_abs(1, i) = NormalizeAngle(Z_abs(1, i));
   }
 
   MatrixXd Z_abs_w = Z_abs.array().rowwise() * weights_.transpose().array();
 
   S = Z_abs_w * Z_abs.transpose();
 
-  //add measurement noise covariance matrix
+  // Add measurement noise covariance matrix
   S(0, 0) += std_radr_ * std_radr_;
   S(1, 1) += std_radphi_ * std_radphi_;
   S(2, 2) += std_radrd_ * std_radrd_;
@@ -381,41 +368,27 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   MatrixXd Tc = X_abs_w_ * Z_abs.transpose();
 
-  //calculate Kalman gain K;
+  // Kalman gain K
   MatrixXd K = Tc * S.inverse();
 
   z = meas_package.raw_measurements_;
-  //residual
+  // Difference between predicted and measured
   VectorXd z_diff = z - z_pred;
 
-  //angle normalization
+  // Normalize angles
   z_diff(1) = NormalizeAngle(z_diff(1));
 
   NIS_radar_ = z_diff.transpose() * S.inverse() * z_diff;
-  // prevent P from diverging
-  if (NIS_radar_ > 100.0) {
-    is_initialized_ = false;
-  }
-  else {
-    //update state mean and covariance matrix
-    x_ += K * z_diff;
-    P_ -= K * S * K.transpose();
-  }
+
+  // Update state and covariance
+  x_ += K * z_diff;
+  P_ -= K * S * K.transpose();
 }
 
-/**
- * Normalizes the angle, yaw or phi. If angle is too big, subtracts the
- * part.
- * @param double angle
- * @return The normalized angle
- */
+/*
+  Normalizes angle if outside measurement space.
+*/
 double UKF::NormalizeAngle(double angle) {
-  //for very high yaw
-  int big_yaw_pi = 100.0 * M_PI; //float?
-  double pi2 = 2.0 * M_PI;
-  if (fabs(angle) > big_yaw_pi) {
-    angle -= floor(angle / pi2) * (pi2);
-  }
 
   while (angle > M_PI) angle -= 2.0 * M_PI;
   while (angle < -M_PI) angle += 2.0 * M_PI;
