@@ -153,7 +153,7 @@ void UKF::Prediction(double delta_t) {
   // Augmented covariance matrix
   MatrixXd P_aug = MatrixXd(7, 7);
 
-  // Augmentmented sigma point matrix
+  // Augmented sigma point matrix
   MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
 
   // Assign values
